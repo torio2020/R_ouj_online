@@ -83,3 +83,62 @@ ggplotでのグラフ作成
         stat_smooth()+    #回帰直線
         
         theme()　　　      #背景など
+
+
+
+2-2 散布図、折れ線グラフ(1)
+#a01 というデータ
+#aes(要素)x座標がA列、y座標がB列
+#ggplot(a01)+geom_point(aes(x=A,y=B))
+#スクリプトは+のあとに改行
+
+> a01 <- read_csv("A02L02.csv")
+Rows: 5 Columns: 3                                                             
+-- Column specification --------------------
+Delimiter: ","
+chr (1): name1
+dbl (2): A, B
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+> ggplot(a01,aes(x=A,y=B))+
++ geom_point()
+
+
+(2)
+#geom_lineで折れ線グラフ
+#labs()で座標のラベルを設定
+#データから自動で設定
+#列の名前を工夫しておく
+#themeで枠組みの色や軸の設定
+#
+#geom_line(color=2)は赤の線
+#グラフはRStudioのExportで保存できる
+#ggsave("ファイル名")でも保存可
+#Rmarkdownでレポートにする
+
+> ggplot(a01,aes(x=A,y=B))+
++ geom_line()+
++ labs(x="height",y="weight")+
++ theme(text=element_text(size=16))
+
+
+(3)
+レイヤーの重ね合わせをしてグラフを描画する
+ggplot(データ)+
+geom_point(mapping=aes(要素))+
+geom_line(mapping=aes(要素))+
+theme(フォントなど)
+
+
+
+2－3　棒グラフ、積み上げグラフ、円グラフ(1)
+#geom_bar()　のみ
+#カテゴリーデータを集計する
+> c01 <- read_csv("A02L03.csv")
+> ggplot(c01,aes(x=A,y=freq)) + 
++ geom_bar(stat="identity")
+
+#列の値をそのままグラフにする場合
+#stat="identity"
+> ggplot(b01,aes(x=study))+geom_bar()
