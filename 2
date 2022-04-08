@@ -132,7 +132,7 @@ theme(フォントなど)
 
 
 
-2－3　棒グラフ、積み上げグラフ、円グラフ(1)
+2－3　棒グラフ、積み上げ棒グラフ、円グラフ(1)
 #geom_bar()　のみ
 #カテゴリーデータを集計する
 > c01 <- read_csv("A02L03.csv")
@@ -142,3 +142,41 @@ theme(フォントなど)
 #列の値をそのままグラフにする場合
 #stat="identity"
 > ggplot(b01,aes(x=study))+geom_bar()
+
+
+
+(2)
+#積み上げ棒グラフ
+#stat="identity"
+#position="fill"
+> p1 <- ggplot(c01,aes(x="",y=freq,fill=A))+
++ geom_bar(stat="identity",position="fill")+
++ geom_text(aes(label=freq,y=pos1))
+> p1
+
+
+(3)
+#円グラフ：扇形の面積が大きさ
+#1要素の積み上げ棒グラフ
+#p1という積み上げ棒グラフを
+#coord_polarで極座標に
+##色によって膨張して見える
+#値の比較には不向き
+#内訳をみる
+#direction=1が半時計周り
+#theme_void()は枠を消す
+> p2 <- p1+
++ coord_polar("y",direction = -1)+
++ theme_void()
+> p2
+
+
+2－4　ヒストグラム、密度グラフ
+#ヒストグラム
+#y=..density..は密度関数用
+#bins=30などで階級数を変更できる
+#binwidthで階級幅
+> ggplot(c02,aes(x=subjA,y=..density..))+
++ geom_histogram()+geom_density()
+`stat_bin()` using `bins = 30`. Pick
+better value with `binwidth`.
