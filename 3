@@ -1,0 +1,34 @@
+箱ひげ図のひげの長さは四分位範囲の1.5倍までとしてそこから外れるものを点や〇で表すという表し方がされることがある
+> library(tidyverse)  
+> d01 <- read_csv("A03L01.csv")
+Rows: 200 Columns: 2                                                                                
+-- Column specification -----------------------------------------
+Delimiter: ","
+chr (1): subject
+dbl (1): score
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+> ggplot(d01) + geom_boxplot(aes(x=subject,y=score)) #箱ひげ図をプロット
+
+共分散：国語と数学が平均より高い(低い)→正
+　　　国語が平均より高い、数学が平均より低い(または逆)→負
+相関係数：共分散をそれぞれの標準偏差の値で割ると必ず-1=<r=<1の範囲で収まる(関係の強さを表す)
+> d02 <- read_csv("A03L02.csv")
+> summary(d02)
+     subjA          subjB      
+ Min.   :39.0   Min.   :17.00  
+ 1st Qu.:53.0   1st Qu.:54.00  
+ Median :61.5   Median :62.00  
+ Mean   :60.3   Mean   :61.68  
+ 3rd Qu.:67.0   3rd Qu.:69.00  
+ Max.   :82.0   Max.   :99.00 
+> var(d02)
+         subjA     subjB
+subjA 89.42424  18.18788
+subjB 18.18788 138.19960
+> cor(d02)
+          subjA     subjB
+subjA 1.0000000 0.1636067
+subjB 0.1636067 1.0000000
+> ggplot(d02) + geom_point(aes(x=subjA,y=subjB)) #相関があまりないのが理解できる
