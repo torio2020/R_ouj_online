@@ -1,0 +1,75 @@
+自分なりに値を変えながら試してみよう
+
+Rにおける関数
+dXXXX:確率密度関数(確率関数)
+pXXXX:累積分布関数
+qXXXX:逆分布関数
+　累積分布関数が確率pになるx
+rXXXX:乱数
+　　　発生させる個数
+XXXX:分布の名前
+
+離散型
+・二項分布:binom
+(例)dbinom(x,n,p)
+・多項分布:multinom
+(例)dmultinom(c(x1,x2),n,c(p1,p2))
+・負の二項分布:nbinom
+・幾何分布:geom
+・ポアソン分布:pois
+
+連続型
+・一様分布:unif
+(例)dunif(x,min,max)
+・正規分布:norm
+(例)dnorm(x,mean,sd)
+・指数分布:exp
+(例)dexp(x,rate)
+・ガンマ分布:gamma
+(例)dgamma(x,shape,rate)
+
+
+3-3 Rによるシミュレーション
+離散型
+0.1の確率で成功するベルヌーイ試行を10回行って3回成功する確率
+> dbinom(3,10,0.1)
+[1] 0.05739563
+
+・seq(a,b,c) aからbまでc刻み　
+(例)> seq(0,10,3)
+[1] 0 3 6 9
+
+> f1 <- tibble(x=0:10,y=dgeom(seq(0,10,1),0.2))   #Rでは0から数える 
+回数を増やしたいときは例えば10を20にしてあげると指数分布にちかいのが見て取れる
+> ggplot(f1) + geom_bar(aes(x=x,y=y),stat="identity")
+
+f2 <- tibble(x=0:1000, y=dbinom(seq(0,1000,1),1000,0.2))
+ggplot(f2) + geom_bar(aes(x=x,y=y),stat="identity")+
+  scale_x_continuous(limits = c(150,250)) #xの範囲を指定する
+正規分布によく似た形になる
+
+
+連続型
+・c(-1,1,5)で定義域
+・stat_function内
+funで分布
+argsでパラメーターを指定する
+
+指数分布
+ggplot( data.frame(x = c(-0.5,4.5) ),aes(x=x) )+
+  stat_function(fun = dexp, args=c(rate=2) )
+  
+ガンマ分布
+ggplot( data.frame(x = c(-1,15) ),aes(x=x) )+
+  stat_function(fun = dgamma, args=c(shape=4,rate=2) )
+  
+bins 30
+ggplot( data.frame(x = rnorm(1000,0.1) ) )+
+  geom_histogram(aes(x=x,y=..density..))
+乱数を増やしてbinsを50くらいにしてあげて描くこともできる
+ggplot( data.frame(x = rnorm(10000,0.1) ) )+
+  geom_histogram(aes(x=x,y=..density..),bins = 50)
+bins=100でdnormと重ねてみると
+ggplot( data.frame(x = rnorm(10000,0.1) ) )+
+  geom_histogram(aes(x=x,y=..density..),bins = 100) +
+  stat_function(fun = dnorm, colour = "red")
