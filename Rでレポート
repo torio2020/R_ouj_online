@@ -1,3 +1,32 @@
+最初に完成形
+library(tidyverse)
+f <- read_csv("worktime.csv",locale = locale(encoding = "shift-jis"))
+f01 <- f[,5:11]
+a.worktime = f01$`6時間29分以下【％】`
+b.worktime = f01$`6時間30分〜6時間59分【％】`
+c.worktime = f01$`7時間00分【％】`
+d.worktime = f01$`7時間01分〜7時間29分【％】`
+e.worktime = f01$`7時間30分〜7時間59分【％】`
+f.worktime = f01$`8時間00分【％】`
+g.worktime = f01$`8時間01分以上【％】`
+
+x <- data.frame(workingtime = c(rep("~6:29", length(a.worktime)),
+                             rep("6:30~6:59", length(b.worktime)),
+                             rep("7:00", length(c.worktime)),
+                             rep("7:01~7:29", length(d.worktime)),
+                             rep("7:30~7:59", length(e.worktime)),
+                             rep("8:00", length(f.worktime)),
+                             rep("8:01~", length(g.worktime))),
+                percentage = c(a.worktime, b.worktime, c.worktime,
+                          d.worktime, e.worktime, f.worktime,
+                          g.worktime)
+                )
+
+g <- ggplot(x, aes(x = workingtime, y = percentage))
+g <- g + geom_boxplot()
+plot(g)
+
+
 library(tidyverse)
 f <- read_csv("worktime5.csv",locale = locale(encoding = "shift-jis")) 
 
