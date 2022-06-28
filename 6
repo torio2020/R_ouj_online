@@ -4,9 +4,129 @@
 試行回数nは決まっているとする。現実にはこういう観測とは限られた回数、
 通常は一回しか行えないという制約があるが、Rでのシュミレーションでは乱数を発生させる。
 
-probというのが推定したい実際の値。このprobというのはわからないので、
+probというのが推定したいalpha <- 0.05
+実際の値。このprobというのはわからないので、
 観測された結果からこのprobを推定しようとするわけです。
-観測の時に観測される個数がn個であるとする。
+観測の時に観測される個数がn個であるとする。p1 <- 1-alpha/2
 numeric(m)はm個の配列のデータというものをあらかじめ定義するというもの。
 最初はm個の値が全て0である、そんなベクトルができると思っておいてください。
+forのところは1:mというので1からm,m回同じことを繰り返すときに書く
+rbinomというのは1回のうち確率probで起こる二項分布を1回行う、そのときの成功回数を出す
+だから1か0、それをn個出す、それを全部足し合わせてnで割ってあげる
+それによって実際のprobの推定値にする(estの値)
+1001個出した乱数で1個の推定値、それがm個できあがってくる
+各回の推定値というのがestというところに入っているので、各回の区間をlowerとupperで指定する
+checkというのは、実際のprobとestが区間推定の幅の中にあるかどうかということで
+推定した区間の中に、信頼区間の中に真の値が入っていればY,そうでなければNというのを判定しているもの
+n=1001なのは、ちょうど割り切れる数にしておくとイコールが入る場合と入らない場合で値がブレることがあるので、
+ちょうど割り切れないように1001という値にしています
+それでm回推定するわけですが、そのそれぞれに関して推定区間の中に、信頼区間の中に入ってるかどうかをチェックできる　
+それをggplotで書いていく
+geom_segmentというのは(x,y)という点から(xend,yend)というところまで線を引く
+colour=checkとなっているので、このcolourの値がYの時とNの時で色を変えて線を引いてくれるというもの
+absは絶対値
+
+> alpha <- 0.05
+> p1 <- 1-alpha/2
+> x1 <- qnorm(alpha/2,0,1)
+> y1 <- dnorm(x1,0,1)
+> x2 <- qnorm(1-alpha/2,0,1)
+> y2 <- dnorm(x2,0,1)
+> x1
+[1] -1.959964
+> x2
+[1] 1.959964
+
+> alpha <- 0.01
+> p1 <- 1-alpha/2
+> x1 <- qnorm(alpha/2,0,1)
+> y1 <- dnorm(x1,0,1)
+> x2 <- qnorm(1-alpha/2,0,1)
+> y2 <- dnorm(x2,0,1)
+> x1
+[1] -2.575829
+> x2
+[1] 2.575829
+
+alpha <- 0.05
+p1 <- 1-alpha/2
+x1 <- qnorm(alpha/2,0,1)
+y1 <- dnorm(x1,0,1)
+x2 <- qnorm(1-alpha/2,0,1)
+y2 <- dnorm(x2,0,1)
+ggplot(data=data.frame(x=c(-4,4)), aes(x=x)) +
+  stat_function(fun=dnorm, args=c(mean=0,sd=1) )+
+  geom_segment(x=x1,y=0,xend=x1,yend=y1,colour="red")+
+  geom_segment(x=x2,y=0,xend=x2,yend=y2,colour="red")+
+  annotate("text",x=0,y=0.3,label=expression(paste(over(alpha,2))))
+  
+  
+> library(tidyverse)
+> prob <- 0.3
+> #１回の標本のサンプル数（割り切れないほうが良い）
+> n <- 1001
+> #実験の回数
+> m <- 100 
+> #信頼係数
+> alpha<- 0.05
+> #estimate（推定量)
+> est <- numeric(m)
+> for(j in 1:m) {
++   est[j]  <- sum(rbinom(n,1,prob)/n)
++ } 
+> #結果をtibbleで表の形にする
+> z <- tibble(count=1:m,est=est,
++             lower=est-qnorm(1-alpha/2,0,1)*sqrt(est*(1-est)/n),
++             upper=est+qnorm(1-alpha/2,0,1)*sqrt(est*(1-est)/n),
++             check= ifelse( abs(prob-est) < qnorm(1-alpha/2,0,1)*
++                              sqrt(est*(1-est)/n),"Y","N")  )
+
+> z
+# A tibble: 100 × 5
+   count   est lower upper check
+   <int> <dbl> <dbl> <dbl> <chr>
+ 1     1 0.313 0.284 0.341 Y    
+ 2     2 0.297 0.268 0.325 Y    
+ 3     3 0.305 0.276 0.333 Y    
+ 4     4 0.287 0.259 0.315 Y    
+ 5     5 0.265 0.237 0.292 N    
+ 6     6 0.291 0.263 0.319 Y    
+ 7     7 0.294 0.265 0.322 Y    
+ 8     8 0.320 0.291 0.349 Y    
+ 9     9 0.291 0.263 0.319 Y    
+10    10 0.302 0.273 0.330 Y    
+# … with 90 more rows
+
+
+# 6-3-1
+library(tidyverse)
+prob <- 0.3
+#１回の標本のサンプル数（割り切れないほうが良い）
+n <- 1001
+#実験の回数
+m <- 100 
+#信頼係数
+alpha<- 0.05
+#estimate（推定量)
+est <- numeric(m)
+for(j in 1:m) {
+  est[j]  <- sum(rbinom(n,1,prob)/n)
+} 
+#結果をtibbleで表の形にする
+z <- tibble(count=1:m,est=est,
+            lower=est-qnorm(1-alpha/2,0,1)*sqrt(est*(1-est)/n),
+            upper=est+qnorm(1-alpha/2,0,1)*sqrt(est*(1-est)/n),
+            check= ifelse( abs(prob-est) < qnorm(1-alpha/2,0,1)*
+                             sqrt(est*(1-est)/n),"Y","N")  )
+#グラフ
+ggplot(z)+geom_point(aes(x=count,y=est))+
+  geom_segment(aes(x=count,y=lower,xend=count,yend=upper,colour=check))+
+  geom_hline(yintercept=prob,colour="red")+ylim(0.1,0.5)
+  
+青く入ってるのが実際の0.3が含まれたパターン
+赤がそうでなかったもの、そうでなかったものを足してみると
+100回のうち6個入ってない
+だから95％の信頼区間で真の値が含まれるというのでやったけど、100回やってみたら94回含まれていた
+1001回出しておけば大数の弱法則があるので1001が大きくなるほど0.3に近づいていく
+101回の場合は0.2から0.4で範囲が広がっていく
 
