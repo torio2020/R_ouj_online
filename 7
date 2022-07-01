@@ -1,0 +1,34 @@
+7-1-4
+２項分布を正規分布で近似
+qnorm:累積確率関数の逆関数
+この関数を使って確率が5％や2．5％以下となるような、その境界の点を求めてみると
+> prob <- 0.5
+> n <- 500
+二項分布の平均> u0 <- n*prob
+分散> s0 <- sqrt(n*prob*(1-prob))
+> qnorm(0.025,mean=u0,sd=s0) #228.0869
+[1] 228.0869
+> qnorm(0.05,mean=u0,sd=s0) #231.61
+[1] 231.61
+>qnorm(0.95,mean=u0,sd=s0) #268.39
+[1] 268.39975
+> qnorm(0.975,mean=u0,sd=s0) #271.9131
+[1] 271.9131
+
+nが大きい時の二項分布と正規分布の理論の曲線を重ねて描いてみたもの
+例えば95％以上になるのは268.39以上ということなので今このスライドの方では０から268まで、
+200からちょうどスライドを描いているので、200から268までをY、269から300までの32個をNとして、
+YとNで色を変えて棒グラフを描いている
+geom_barでfill=z:色を変えて棒クラフをかく
+
+
+library(tidyverse)
+prob <- 0.5
+n <- 500
+u0 <- n*prob
+s0 <- sqrt(n*prob*(1-prob))
+i3 <- tibble(x=200:300,y=dbinom(200:300,n,prob),z=c(rep("Y",69),rep("N",32)))
+ggplot(i3)+geom_bar(aes(x=x,y=y,fill=z),stat="identity")+
+  stat_function(fun=dnorm,args=c(mean=u0,sd=s0),color="red")+
+  theme(legend.position="none")+
+  scale_fill_manual(values=c("red","black"))
