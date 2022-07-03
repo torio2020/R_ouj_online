@@ -32,3 +32,130 @@ ggplot(i3)+geom_bar(aes(x=x,y=y,fill=z),stat="identity")+
   stat_function(fun=dnorm,args=c(mean=u0,sd=s0),color="red")+
   theme(legend.position="none")+
   scale_fill_manual(values=c("red","black"))
+  
+  
+x <- c(97.7,94.7,91.6,98.0,102.9,94.5,99.1,95.3,93.8,102.0)
+z1 <- sum(x-100)/(sqrt(10)*5)
+t1 <- (mean(x)-100)/(sqrt(var(x))/sqrt(10))
+y1 <- dt(t1,9)
+p <- 2*pt(t1,9)
+ggplot(data=data.frame(x=c(-4,4)),aes(x=x))+
+  stat_function(fun=dt,args=c(df=9))+
+  geom_segment(x=t1,y=0,xend=t1,yend=y1,colour="red")+
+  geom_segment(x=-t1,y=0,xend=-t1,yend=y1,colour="red")
+t.test(x,mu=100,alternative = "two.sided")
+
+
+	One Sample t-test
+
+data:  x
+t = -2.638, df = 9, p-value = 0.027
+alternative hypothesis: true mean is not equal to 100
+95 percent confidence interval:
+ 94.35307 99.56693
+sample estimates:
+mean of x 
+    96.96 
+    
+greaterかlessで片側検定を行う
+
+2標本問題
+pivot_longer()というのは縦長と横長を切り替えるというもの
+ex1 <- tibble(subX=subX,subY=subY)
+ex2 <- ex1 %>% pivot_longer(subX:subY,names_to="sub",values_to="score")
+> ex2
+# A tibble: 20 × 2
+   sub   score
+   <chr> <dbl>
+ 1 subX     66
+ 2 subY     61
+ 3 subX     73
+ 4 subY     64
+ 5 subX     65
+ 6 subY     69
+ 7 subX     64
+ 8 subY     65
+ 9 subX     59
+10 subY     70
+11 subX     64
+12 subY     76
+13 subX     66
+14 subY     74
+15 subX     63
+16 subY     82
+17 subX     64
+18 subY     79
+19 subX     74
+20 subY     72
+
+いずれにしても一列でxとyと点数が出てくると
+箱ひげ図がかける
+ggplot(ex2)+geom_boxplot(aes(x=sub,y=score))
+
+分散分析はそれぞれベクトルを指定してあげるとできる
+
+> library(tidyverse)
+> subX <- c(66,73,65,64,59,64,66,63,64,74)
+> subY <- c(61,64,69,65,70,76,74,82,79,72)
+> ex1 <- tibble(subX=subX,subY=subY)
+> ex2 <- ex1 %>% pivot_longer(subX:subY,names_to="sub",values_to="score")
+> ggplot(ex2)+geom_boxplot(aes(x=sub,y=score))
+> 
+> var.test(ex1$subX,ex1$subY)
+
+	F test to compare two variances
+
+data:  ex1$subX and ex1$subY
+F = 0.44824, num df = 9, denom df = 9, p-value = 0.2477
+alternative hypothesis: true ratio of variances is not equal to 1
+95 percent confidence interval:
+ 0.111337 1.804620
+sample estimates:
+ratio of variances 
+         0.4482422 
+
+分散が等しい場合と等しくない場合で計算するとこうなる
+
+> t.test(ex1$subX,ex1$subY,paired=FALSE,var.equal=FALSE)
+
+	Welch Two Sample t-test
+
+data:  ex1$subX and ex1$subY
+t = -2.1034, df = 15.718, p-value = 0.05191
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -10.85039961   0.05039961
+sample estimates:
+mean of x mean of y 
+     65.8      71.2 
+
+> t.test(ex1$subX,ex1$subY,paired=FALSE,var.equal=TRUE)
+
+	Two Sample t-test
+
+data:  ex1$subX and ex1$subY
+t = -2.1034, df = 18, p-value = 0.04976
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -10.793730633  -0.006269367
+sample estimates:
+mean of x mean of y 
+     65.8      71.2
+     
+     
+     
+ 対応のある場合
+差を計算してt検定
+１標本の場合のt検定
+ > t.test(ex1$subX,ex1$subY,paired=TRUE)
+
+	Paired t-test
+
+data:  ex1$subX and ex1$subY
+t = -1.8701, df = 9, p-value = 0.09428
+alternative hypothesis: true mean difference is not equal to 0
+95 percent confidence interval:
+ -11.932026   1.132026
+sample estimates:
+mean difference 
+           -5.4 
